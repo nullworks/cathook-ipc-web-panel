@@ -17,7 +17,7 @@ class ProcEvents extends EventEmitter {
         this.cache = {};
         this.init = 2;
         this.interval = 0;
-        this.setMaxListeners(32);
+        this.setMaxListeners(255);
     }
     start() {
         this.interval = setInterval(this.update.bind(this), 500);
