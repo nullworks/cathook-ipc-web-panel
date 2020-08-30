@@ -87,9 +87,23 @@ class Bot extends EventEmitter {
         this.logGame = null;
 
         this.isGarbageDistro = !fs.existsSync(`${this.user.home}/.local/share/Steam/steam`);
-        this.steamPath = this.isGarbageDistro ? `${this.user.home}/.steam` : `${this.user.home}/.local/share/Steam`
-        this.tf2Path = this.isGarbageDistro ? `${this.steamPath}/steam/steamapps/common/Team Fortress 2` : `${this.steamPath}/steamapps/common/Team Fortress 2`
-
+        this.isSuperGarbageDistro = fs.existsSync(`${this.user.home}/.steam/debian-installation`);
+        if (this.isSuperGarbageDistro)
+        {
+            this.steamPath = `${this.user.home}/.steam/debian-installation`;
+            this.tf2Path = `${this.steamPath}/steamapps/common/Team Fortress 2`;
+        }
+        else if (this.isGarbageDistro)
+        {
+            this.steamPath = `${this.user.home}/.steam`;
+            this.tf2Path = `${this.steamPath}/steam/steamapps/common/Team Fortress 2`;
+        }
+        else
+        {
+            this.steamPath = `${this.user.home}/.local/share/Steam`;
+            this.tf2Path = `${this.steamPath}/steamapps/common/Team Fortress 2`;
+        }
+        
         this.steamNativeRuntime = fs.existsSync("/usr/lib/steam/native_runtime.txt") || !fs.existsSync(`${this.steamPath}/ubuntu12_32/steam-runtime`)
 
         // Dynamically determine LD_LIBRARY_PATH with steam-runtime
