@@ -70,3 +70,17 @@ a:visited {
 .stopped .active {
     color: #a1aa95;
 }
+.out {
+  height: 50px;
+  width: 150px;
+}
+.money {
+}
+img {
+  height: auto;
+  width: 100px;
+  display: none
+}
+.money:hover img {
+  display: block;
+}
