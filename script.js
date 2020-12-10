@@ -181,7 +181,7 @@ function updateUserData(bot, data) {
 		row.find('.client-pid').text(data.ipc.pid);
 		row.find('.client-uptime-total').text(format(Date.now() - data.started));
         row.find('.client-restarts').text(data.restarts);
-        row.find('.client-steam').empty().append($('<a></a>').text('Profile').attr('href', `https://steamcommunity.com/profiles/${data.ipc.friendid}`).attr('target', '_blank'));
+        row.find('.client-steam').empty().append($('<a></a>').text('Profile').attr('href', `https://steamcommunity.com/profiles/[U:1:${data.ipc.friendid}]`).attr('target', '_blank'));
 	}
 	if (data.state != 5) {
 		row.find('.active').text('N/A');
