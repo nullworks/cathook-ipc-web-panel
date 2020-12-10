@@ -248,7 +248,7 @@ class Bot extends EventEmitter {
             var res = procevt.find('hl2_linux', self.user.uid);
             if (!res.length || !self.procFirejailGame) {
                 self.log('[ERROR] Could not find running game!');
-                self.timeoutSteamRestart = setTimeout(self.restart.bind(self), TIMEOUT_RESTART);
+                self.timeoutSteamRestart = setTimeout(self.restart.bind(self), RESTART_DELAY);
                 return;
             }
             self.procGame = res[0];
@@ -281,7 +281,7 @@ class Bot extends EventEmitter {
         var self = this;
         self.log(`Steam (${self.procFirejailSteam.pid}) exited with code ${code}, signal ${signal}`);
         if (!self.stopped)
-            self.timeoutSteamRestart = setTimeout(self.restart.bind(self), TIMEOUT_RESTART);
+            self.timeoutSteamRestart = setTimeout(self.restart.bind(self), RESTART_DELAY);
         self.emit('exit-steam');
         delete self.procFirejailSteam;
     }
