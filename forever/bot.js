@@ -15,11 +15,19 @@ const config = require('./config');
 const LAUNCH_OPTIONS_GAME = 'firejail --join=%JAILNAME% su - %USER% -c \'cd $GAMEPATH && LD_LIBRARY_PATH=%LD_LIBRARY_PATH% LD_PRELOAD=%LD_PRELOAD% PULSE_SERVER="unix:/tmp/pulse.sock" DISPLAY=%DISPLAY% ./hl2_linux -game tf -silent -sw -h 640 -w 480 -novid -nojoy -noshaderapi -nomouse -nomessagebox -nominidumps -nohltv -nobreakpad -particles 512 -snoforceformat -softparticlesdefaultoff -threads 1\'';
 const LAUNCH_OPTIONS_STEAM = 'firejail --noprofile --blacklist=%STEAMWEBHELPERPATH% --name=%JAILNAME% --dns=1.1.1.1 --netns=%NETNS% --allusers su - %USER% -c \'DISPLAY=%DISPLAY% LD_PRELOAD=%LD_PRELOAD% PULSE_SERVER="unix:/tmp/pulse.sock" steam -silent -login %LOGIN% %PASSWORD% -noverifyfiles -nominidumps -nobreakpad -nobrowser -nofriendsui\'';
 
-const TIMEOUT_START_GAME = 60000;
+// Adjust these values as needed to optimize catbot performance
+// How long to wait for the TF2 process to be created by Steam
+const TIMEOUT_START_GAME = 10000;
+// How long to delay starting TF2 after starting Steam
+const GAME_START_DELAY = 60000;
+// account-generator artifact, feel free to reduce to e.g. 5000 if using static accounts
 const TIMEOUT_RETRY_ACCOUNT = 30000;
+// Timeout for cathook to connect to the IPC server once injected
 const TIMEOUT_IPC_STATE = 90000;
-const TIMEOUT_RESTART = 10000;
+// How long to wait before starting Steam and TF2 again after they've been terminated due to e.g. IPC timeout
+const RESTART_DELAY = 10000;
 
+// Time to wait between starting each instance of Steam or TF2
 const steamStartQueue = new ExecQueue(5000);
 const gameStartQueue = new ExecQueue(5000);
 
@@ -142,7 +150,7 @@ class Bot extends EventEmitter {
             var loop = setInterval(function () {
                 // Start timestmap + Additional Time (Based on Queue size) 
                 if (self.processingStartTime == self.processingWaitTime)
-                    self.processingWaitTime = self.processingStartTime + TIMEOUT_START_GAME * (module.exports.currentlyStartingGames + 1);
+                    self.processingWaitTime = self.processingStartTime + GAME_START_DELAY * (module.exports.currentlyStartingGames + 1);
                 if (Date.now() >= self.processingWaitTime)
                 {
                     if (self.state == STATE.STARTING)
@@ -267,7 +275,7 @@ class Bot extends EventEmitter {
                     self.restart();
                 }
             }, TIMEOUT_IPC_STATE);
-        }, 10000);
+        }, TIMEOUT_START_GAME);
     }
     handleSteamExit(code, signal) {
         var self = this;
