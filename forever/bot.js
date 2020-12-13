@@ -97,7 +97,7 @@ class Bot extends EventEmitter {
         this.logSteam = null;
         this.logGame = null;
 
-        this.isGarbageDistro = !fs.existsSync(`${this.home}/.local/share/Steam/steam`);
+        this.isGarbageDistro = !fs.existsSync(`${USER.home}/.local/share/Steam/steam`);
         this.steamPath = this.isGarbageDistro ? `${this.home}/.steam` : `${this.home}/.local/share/Steam`
         this.mainSteamPath = this.isGarbageDistro ? `${USER.home}/.steam` : `${USER.home}/.local/share/Steam`
         this.steamApps = this.isGarbageDistro ? `${this.steamPath}/steam/steamapps` : `${this.steamPath}/steamapps`;
@@ -155,14 +155,7 @@ class Bot extends EventEmitter {
 
     setupSteamapps() {
         // I'm scared of doing recursive deletes in nodejs
-        try {
-            fs.renameSync(this.steamApps, path.join(this.steamApps, '..', 'steamapps_old'));
-        } catch (error) {
-            if (error.code == "EBUSY")
-                return false;
-            else
-                throw error;
-        }
+        fs.renameSync(this.steamApps, path.resolve(this.steamApps, '..', 'steamapps_old'));
         fs.symlinkSync("/opt/steamapps/", this.steamApps);
         return true;
     }
@@ -208,6 +201,9 @@ class Bot extends EventEmitter {
             var text = data.toString();
             if (text.includes("System startup time:")) {
                 self.isSteamWorking = true;
+                if (this.shouldSetupSteamapps()) {
+                    this.setupSteamapps();
+                }
             }
         });
         self.procFirejailSteam.stdout.on("data", (data) => {
@@ -334,10 +330,7 @@ class Bot extends EventEmitter {
                     return;
                 }
                 else {
-                    if (this.shouldSetupSteamapps()) {
-                        this.shouldRestart = true;
-                    }
-                    else if (!this.procFirejailGame) {
+                    if (!this.procFirejailGame) {
                         this.spawnGame();
                         this.state = STATE.WAITING;
                         this.time_gameCheck = time + TIMEOUT_START_GAME;
@@ -410,14 +403,7 @@ class Bot extends EventEmitter {
             this.state = STATE.STOPPING;
             if (!this.procFirejailSteam && !this.procFirejailGame) {
                 this.state = this.shouldRestart ? STATE.RESTARTING : STATE.INITIALIZED;
-                if (this.shouldSetupSteamapps()) {
-                    if (this.setupSteamapps())
-                        this.shouldRestart = false;
-                    else
-                        self.log('[ERROR] Steamapps folder is busy!');
-                }
-                else
-                    this.shouldRestart = false;
+                this.shouldRestart = false;
             }
             if (!config.nodiscard && this.account) {
                 this.log(`Discarding account ${this.account.login} (${this.account.steamID || this.account.steamid})`);
