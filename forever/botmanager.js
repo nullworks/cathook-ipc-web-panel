@@ -1,30 +1,26 @@
-const procevt = require('./procevt');
-const passwd = require('./passwd');
 const fs = require('fs');
 const Bot = require('./bot');
-
-const users = new passwd.Passwd();
-const USERNAMES = require('fs').readFileSync('../kisak').toString().split('\n')[0];
 
 class BotManager {
     constructor(cc) {
         var self = this;
         try {
             fs.mkdirSync('logs');
-        } catch (e) {}
+        } catch (e) { }
         this.bots = [];
         this.cc = cc;
         this.quota = 0;
         this.lastQuery = {};
         this.updateTimeout = setTimeout(this.update.bind(this), 1000);
-        console.log(`Base account name: "${USERNAMES}"`);
     }
     update() {
         var self = this;
         Bot.currentlyStartingGames = 0;
-        for (var b of self.bots)
+        for (var b of self.bots) {
             if (b.status == Bot.states.STARTING || b.status == Bot.states.WAITING)
                 Bot.currentlyStartingGames++;
+            b.update();
+        }
         self.cc.command('query', {}, function (data) {
             self.updateTimeout = setTimeout(self.update.bind(self), 1000);
             self.lastQuery = data;
@@ -40,27 +36,10 @@ class BotManager {
             }
         });
     }
-    freeUser() {
-        users.readSync();
-        var nonfree = {};
-        for (var bot of this.bots) {
-            nonfree[bot.user.uid] = true;
-        }
-        for (var uid in users.users) {
-            if (users.users[uid].name.indexOf(USERNAMES) >= 0 && !nonfree[uid]) return users.users[uid];
-        }
-        return null;
-    }
     enforceQuota() {
         var quota = this.quota;
-        var actual = this.bots.length;
         while (this.bots.length < quota) {
-            var u = this.freeUser();
-            if (!u) {
-                console.log('[ERROR] Could not allocate user for bot!');
-                return;
-            }
-            this.bots.push(new Bot.bot('b' + u.uid, u));
+            this.bots.push(new Bot.bot("b" + this.bots.length));
         }
         while (this.bots.length > quota) {
             var b = this.bots.pop();

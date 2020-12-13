@@ -189,7 +189,7 @@ function updateUserData(bot, data) {
 	updateIPCData(row, data.ipcID, data.ipc);
 }
 
-function addClientRow(botid, username) {
+function addClientRow(botid) {
     var row = $('<tr></tr>').attr('data-id', botid).addClass('disconnected stopped');
     var actions = $('<td></td>').attr('class', 'client-actions');
     actions.append($('<input>').attr('type', 'button').attr('value', 'Command').on('click', commandButtonCallback));
@@ -198,7 +198,6 @@ function addClientRow(botid, username) {
     row.append(actions);
 	row.append($('<td></td>').attr('class', 'client-restarts').text('N/A'));
     row.append($('<td></td>').attr('class', 'client-bot-name').text(botid));
-	row.append($('<td></td>').attr('class', 'client-user').text(username));
 	row.append($('<td></td>').attr('class', 'client-state').text('UNDEFINED'));
 	row.append($('<td></td>').attr('class', 'client-steam').text('N/A'));
     row.append($('<td></td>').attr('class', 'client-uptime-total active').text('N/A'));
@@ -245,7 +244,7 @@ function refreshComplete() {
 		console.log(b);
 		for (var i in b.bots) {
 			count++;
-			addClientRow(i, b.bots[i].user.name)
+			addClientRow(i)
 		}
 		last_count = count;
 	})

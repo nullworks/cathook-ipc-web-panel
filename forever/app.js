@@ -1,10 +1,4 @@
-const execSync = require("child_process").execSync;
-const fs = require('fs');
-const bodyparser = require('body-parser');
-
 const procevt = require('./procevt');
-const Bot = require('./bot');
-const passwd = require('./passwd');
 const BotManager = require('./botmanager');
 const config = require('./config');
 
