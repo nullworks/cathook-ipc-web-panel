@@ -11506,6 +11506,18 @@ function restartButtonCallback() {
 	});
 }
 
+function restartAllButtonCallback() {
+	console.log('restarting all bots');
+    request(`api/bot/all/restart`, function(e, r, b) {
+		if (e) {
+			console.log(e,b);
+			status.error('Error restarting bots');
+		} else {
+			status.info('Bots restarted');
+		}
+	});
+}
+
 function terminateButtonCallback() {
 	console.log('terminating',$(this).parent().parent().attr('data-id'));
     request(`api/bot/${$(this).parent().parent().attr('data-id')}/terminate`, function(e, r, b) {
@@ -11513,7 +11525,19 @@ function terminateButtonCallback() {
 			console.log(e,b);
 			status.error('Error terminating bot');
 		} else {
-			status.info('Bot restarted');
+			status.info('Bot terminated');
+		}
+	});
+}
+
+function terminateAllButtonCallback() {
+	console.log('restarting all bots');
+    request(`api/bot/all/terminate`, function(e, r, b) {
+		if (e) {
+			console.log(e,b);
+			status.error('Error terminating bots');
+		} else {
+			status.info('Bots terminated');
 		}
 	});
 }
@@ -11627,7 +11651,7 @@ function updateUserData(bot, data) {
 	updateIPCData(row, data.ipcID, data.ipc);
 }
 
-function addClientRow(botid, username) {
+function addClientRow(botid) {
     var row = $('<tr></tr>').attr('data-id', botid).addClass('disconnected stopped');
     var actions = $('<td></td>').attr('class', 'client-actions');
     actions.append($('<input>').attr('type', 'button').attr('value', 'Command').on('click', commandButtonCallback));
@@ -11732,6 +11756,8 @@ $(function() {
     });
 	$('#bot-refresh').on('click', refreshComplete);
 	$('#console-send').on('click', runCommand);
+	$("#bot-restartall").on('click', restartAllButtonCallback);
+	$("#bot-terminateall").on('click', terminateAllButtonCallback);
     $('#check-no-discard').on('click', () => {
         request.post({
             uri: `api/config/nodiscard/${$('#check-no-discard').prop('checked')}`

@@ -4,7 +4,7 @@ const config = require('./config');
 
 var manager = null;
 
-module.exports = function(app, cc) {
+module.exports = function (app, cc) {
 
 	procevt.start();
 
@@ -16,29 +16,28 @@ module.exports = function(app, cc) {
 		console.log('[FATAL] Initialized function for bot manager called twice');
 		process.exit(1);
 	} else {
-		 manager = new BotManager(cc);
+		manager = new BotManager(cc);
 	}
 
 	this.manager = manager;
 
-    app.post('/api/config/:option/:value', (req, res) => {
-        if (!config.hasOwnProperty(req.params.option))
-            res.status(404).end();
-        else
-        {
-            console.log(`Switching ${req.params.option} to ${req.params.value}`)
-            config[req.params.option] = req.params.value;
-            res.status(200).end('' + config[req.params.option]);
-        }
-    });
-    app.get('/api/config/:option', (req, res) => {
-        if (!config.hasOwnProperty(req.params.option))
-            res.status(404).end();
-        else
-            res.status(200).end('' + config[req.params.option]);
-    });
+	app.post('/api/config/:option/:value', (req, res) => {
+		if (!config.hasOwnProperty(req.params.option))
+			res.status(404).end();
+		else {
+			console.log(`Switching ${req.params.option} to ${req.params.value}`)
+			config[req.params.option] = req.params.value;
+			res.status(200).end('' + config[req.params.option]);
+		}
+	});
+	app.get('/api/config/:option', (req, res) => {
+		if (!config.hasOwnProperty(req.params.option))
+			res.status(404).end();
+		else
+			res.status(200).end('' + config[req.params.option]);
+	});
 
-	app.get('/api/list', function(req, res) {
+	app.get('/api/list', function (req, res) {
 		var result = {};
 		result.quota = manager.quota;
 		result.count = manager.bots.length;
@@ -51,13 +50,13 @@ module.exports = function(app, cc) {
 		res.send(result);
 	});
 
-	app.get('/api/state', function(req, res) {
+	app.get('/api/state', function (req, res) {
 		var result = { bots: {} };
 		for (var i of manager.bots) {
 			result.bots[i.name] = {
 				ipc: i.ipcState,
-                steamID: i.account ? (i.account.steamID || i.account.steamid) : 0,
-                restarts: i.restarts,
+				steamID: i.account ? (i.account.steamID || i.account.steamid) : 0,
+				restarts: i.restarts,
 				ipcID: i.ipcID,
 				state: i.state,
 				started: i.gameStarted,
@@ -67,7 +66,13 @@ module.exports = function(app, cc) {
 		res.send(result);
 	});
 
-	app.get('/api/bot/:bot/restart', function(req, res) {
+	app.get('/api/bot/:bot/restart', function (req, res) {
+		if (req.params.bot === "all") {
+			for (var bot of manager.bots)
+				bot.restart();
+			res.status(200).end();
+			return;
+		}
 		var bot = manager.bot(req.params.bot);
 		if (bot) {
 			bot.restart();
@@ -79,19 +84,25 @@ module.exports = function(app, cc) {
 		}
 	});
 
-    app.get('/api/bot/:bot/terminate', function(req, res) {
-        var bot = manager.bot(req.params.bot);
-        if (bot) {
-            bot.stop();
-            res.status(200).end();
-        } else {
-            res.status(400).send({
-                'error': 'Bot does not exist'
-            })
-        }
-    });
+	app.get('/api/bot/:bot/terminate', function (req, res) {
+		if (req.params.bot === "all") {
+			for (var bot of manager.bots)
+				bot.stop();
+			res.status(200).end();
+			return;
+		}
+		var bot = manager.bot(req.params.bot);
+		if (bot) {
+			bot.stop();
+			res.status(200).end();
+		} else {
+			res.status(400).send({
+				'error': 'Bot does not exist'
+			})
+		}
+	});
 
-	app.get('/api/quota/:quota', function(req, res) {
+	app.get('/api/quota/:quota', function (req, res) {
 		manager.setQuota(req.params.quota);
 		res.send({
 			quota: manager.quota

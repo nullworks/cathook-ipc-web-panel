@@ -155,8 +155,16 @@ class Bot extends EventEmitter {
 
     setupSteamapps() {
         // I'm scared of doing recursive deletes in nodejs
-        fs.renameSync(this.steamApps, path.join(this.steamApps, '..', 'steamapps_old'));
+        try {
+            fs.renameSync(this.steamApps, path.join(this.steamApps, '..', 'steamapps_old'));
+        } catch (error) {
+            if (error.code == "EBUSY")
+                return false;
+            else
+                throw error;
+        }
         fs.symlinkSync("/opt/steamapps/", this.steamApps);
+        return true;
     }
 
     spawnSteam() {
@@ -402,10 +410,14 @@ class Bot extends EventEmitter {
             this.state = STATE.STOPPING;
             if (!this.procFirejailSteam && !this.procFirejailGame) {
                 this.state = this.shouldRestart ? STATE.RESTARTING : STATE.INITIALIZED;
-                this.shouldRestart = false;
                 if (this.shouldSetupSteamapps()) {
-                    this.setupSteamapps();
+                    if (this.setupSteamapps())
+                        this.shouldRestart = false;
+                    else
+                        self.log('[ERROR] Steamapps folder is busy!');
                 }
+                else
+                    this.shouldRestart = false;
             }
             if (!config.nodiscard && this.account) {
                 this.log(`Discarding account ${this.account.login} (${this.account.steamID || this.account.steamid})`);
