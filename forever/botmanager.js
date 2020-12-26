@@ -44,6 +44,7 @@ class BotManager {
         while (this.bots.length > quota) {
             var b = this.bots.pop();
             b.stop();
+            b.delete_ns();
         }
     }
     bot(name) {

@@ -77,6 +77,9 @@ class Bot extends EventEmitter {
         this.botid = name.split("b")[1];
         this.home = path.join(__dirname, "..", "..", "user_instances", this.name)
 
+        // Create a network namespace for this bot
+        child_process.execSync("./scripts/ns-inet " + this.botid)
+
         this.stopped = false;
         this.account = null;
         this.restarts = 0;
@@ -419,8 +422,14 @@ class Bot extends EventEmitter {
         else
             this.shouldRun = true;
     }
+
     stop() {
         this.shouldRun = false;
+    }
+
+    delete_ns() {
+        // Delete the network namespace for this bot
+        child_process.execSync("./scripts/ns-delete " + this.botid)
     }
 }
 
