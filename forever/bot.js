@@ -10,7 +10,7 @@ const accounts = require('./acc.js');
 const ExecQueue = require('./execqueue');
 const config = require('./config');
 
-const LAUNCH_OPTIONS_STEAM = 'firejail --net="%INTERFACE%" --noprofile --private="%HOME%" --name=%JAILNAME% --env=DISPLAY=%DISPLAY% --env=LD_PRELOAD=%LD_PRELOAD% --env=PULSE_SERVER="unix:/tmp/pulse.sock" steam -silent -login %LOGIN% %PASSWORD% -nominidumps -nobreakpad -no-browser -nofriendsui'
+const LAUNCH_OPTIONS_STEAM = 'firejail --dns=1.1.1.1 --netns=%NETNS% --noprofile --private="%HOME%" --name=%JAILNAME% --env=DISPLAY=%DISPLAY% --env=LD_PRELOAD=%LD_PRELOAD% --env=PULSE_SERVER="unix:/tmp/pulse.sock" steam -silent -login %LOGIN% %PASSWORD% -nominidumps -nobreakpad -no-browser -nofriendsui'
 const LAUNCH_OPTIONS_GAME = 'firejail --join=%JAILNAME% bash -c \'cd $GAMEPATH && LD_LIBRARY_PATH=%LD_LIBRARY_PATH% LD_PRELOAD=%LD_PRELOAD% PULSE_SERVER="unix:/tmp/pulse.sock" DISPLAY=%DISPLAY% ./hl2_linux -game tf -silent -sw -h 640 -w 480 -novid -nojoy -noshaderapi -nomouse -nomessagebox -nominidumps -nohltv -nobreakpad -particles 512 -snoforceformat -softparticlesdefaultoff -threads 1\''
 
 // Adjust these values as needed to optimize catbot performance
@@ -63,7 +63,7 @@ if (!process.env.SUDO_USER) {
     process.exit(1);
 }
 
-const USER = { name: process.env.SUDO_USER, uid: Number.parseInt(child_process.execSync("id -u " + process.env.SUDO_USER).toString().trim()), home: child_process.execSync(`printf ~${process.env.SUDO_USER}`).toString(), interface: child_process.execSync("route -n | grep '^0\.0\.0\.0' | grep -o '[^ ]*$' | head -n 1").toString().trim() };
+const USER = { name: process.env.SUDO_USER, uid: Number.parseInt(child_process.execSync("id -u " + process.env.SUDO_USER).toString().trim()), home: child_process.execSync(`printf ~${process.env.SUDO_USER}`).toString() };
 
 console.log('Main user name: ' + USER.name);
 
@@ -74,6 +74,7 @@ class Bot extends EventEmitter {
         this.state = STATE.INITIALIZING;
 
         this.name = name;
+        this.botid = name.split("b")[1];
         this.home = path.join(__dirname, "..", "..", "user_instances", this.name)
 
         this.stopped = false;
@@ -189,8 +190,8 @@ class Bot extends EventEmitter {
             .replace("%LD_PRELOAD%", `"${process.env.STEAM_LD_PRELOAD}"`)
             // XOrg Display
             .replace("%DISPLAY%", process.env.DISPLAY)
-            // Network interface
-            .replace("%INTERFACE%", USER.interface)
+            // Linux network namespace
+            .replace("%NETNS%", `ns${self.botid}`)
             // Home folder
             .replace("%HOME%", self.home),
             self.spawnOptions);
