@@ -98,8 +98,8 @@ class Bot extends EventEmitter {
         this.logGame = null;
 
         this.isGarbageDistro = !fs.existsSync(`${USER.home}/.local/share/Steam/steam`);
-        this.steamPath = this.isGarbageDistro ? `${this.home}/.steam` : `${this.home}/.local/share/Steam`
-        this.mainSteamPath = this.isGarbageDistro ? `${USER.home}/.steam` : `${USER.home}/.local/share/Steam`
+        this.steamPath = this.isGarbageDistro ? `${this.home}/.steam` : `${this.home}/.local/share/Steam`;
+        this.mainSteamPath = this.isGarbageDistro ? `${USER.home}/.steam` : `${USER.home}/.local/share/Steam`;
         this.steamApps = this.isGarbageDistro ? `${this.steamPath}/steam/steamapps` : `${this.steamPath}/steamapps`;
         this.tf2Path = this.isGarbageDistro ? `${this.mainSteamPath}/steam/steamapps/common/Team Fortress 2` : `${this.mainSteamPath}/steamapps/common/Team Fortress 2`
 
@@ -226,8 +226,8 @@ class Bot extends EventEmitter {
         if (!self.LD_LIBRARY_PATH)
             // Dynamically determine LD_LIBRARY_PATH with steam-runtime
             self.LD_LIBRARY_PATH = `${child_process.execSync("./run.sh printenv LD_LIBRARY_PATH", {
-                cwd: `${this.steamPath}/ubuntu12_32/steam-runtime`
-            }).toString().replace(/(\r\n|\n|\r)/gm, "")}:"${this.tf2Path}/bin"`
+                cwd: `${this.mainSteamPath}/ubuntu12_32/steam-runtime`
+            }).toString().replace(/(\r\n|\n|\r)/gm, "")}:"${this.tf2Path}/bin"`;
 
         var filename = `/tmp/.gl${makeid(6)}`;
         fs.copyFileSync("/opt/cathook/bin/libcathook-textmode.so", filename);
