@@ -34,8 +34,7 @@ const STATE = {
     RUNNING: 5,
     RESTARTING: 6,
     STOPPING: 7,
-    WAITING_ACCOUNT: 8,
-    INJECTED: 9
+    NO_ACCOUNT: 8,
 }
 
 function makeid(length) {
@@ -146,7 +145,6 @@ class Bot extends EventEmitter {
         this.time_steamWorking = 0;
         this.time_gameCheck = 0;
         this.time_ipcState = 0;
-        this.gettingAccount = false;
         this.shouldResetSteam = false;
     }
 
@@ -283,7 +281,7 @@ class Bot extends EventEmitter {
                     tail_steam_err_log = null;
                 }
             });
-        self.log(`Launched ${steambin} (${self.procFirejailSteam.pid}) as ${self.account.steamID || self.account.steamid}`);
+        self.log(`Launched ${steambin} (${self.procFirejailSteam.pid})`);
         self.emit('start-steam', self.procFirejailSteam.pid);
     }
 
@@ -338,7 +336,6 @@ class Bot extends EventEmitter {
         this.time_gameCheck = 0;
         this.time_ipcState = 0;
         this.shouldRestart = false;
-        this.gettingAccount = false;
         // Needs to be reset here because resetting it in handleGameExit is not enough
         this.ipcState = null;
     }
@@ -429,23 +426,12 @@ class Bot extends EventEmitter {
                     this.killGame();
                 }
                 else {
-                    if (!this.account && !this.gettingAccount) {
-                        this.gettingAccount = true;
-                        this.state = STATE.WAITING_ACCOUNT;
+                    if (!this.account) {
+                        this.state = STATE.NO_ACCOUNT;
                         this.log('Preparing to restart with new account...');
-                        var self = this;
-                        accounts.get(function (err, acc) {
-                            if (err) {
-                                self.log('Error while getting account!');
-                                self.gettingAccount = false;
-                                return;
-                            }
-                            self.account = acc;
-                            // This also gets reset in this.reset, but just in case
-                            self.gettingAccount = false;
-                        });
+                        this.account = accounts.get(this.botid);
                     }
-                    else if (this.account && module.exports.currentlyStartingGames < MAX_CONURRENT_BOTS) {
+                    if (this.account && module.exports.currentlyStartingGames < MAX_CONURRENT_BOTS) {
                         module.exports.currentlyStartingGames++;
                         this.state = STATE.STARTING;
                         this.reset();
@@ -467,10 +453,8 @@ class Bot extends EventEmitter {
                 this.state = this.shouldRestart ? STATE.RESTARTING : STATE.INITIALIZED;
                 this.shouldRestart = false;
             }
-            if (!config.nodiscard && this.account) {
-                this.log(`Discarding account ${this.account.login} (${this.account.steamID || this.account.steamid})`);
+            if (this.account)
                 this.account = null;
-            }
         }
     }
 

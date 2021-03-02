@@ -1,59 +1,26 @@
-const request = require('request');
 const fs = require('fs');
+const timestamp = require('time-stamp');
 
-function accgen(callback) {
-    apikey = null;
-    try {
-        apikey = fs.readFileSync('/tmp/accgen2-apikey').toString();
-    }
-    catch (err) {
-        callback(err);
-    }
-    request('http://localhost:8080/api/cg/pop?key=' + apikey, function (e, r, b) {
-        if (e)
-            return callback(e);
-        try {
-            callback(null, JSON.parse(b).account);
-        } catch (e) {
-            return callback(e);
-        }
-    });
-}
 module.exports = {
-    get: function get(callback) {
-        var apikey = "";
+    get: function get(index) {
         try {
-            apikey = fs.readFileSync("apikey", 'utf8');
+            var accounts = fs.readFileSync("../accounts.txt", 'utf8');
+            accounts = accounts.trim();
+            let data_array = accounts.split(/\r\n|\r|\n|:/g);
+            let account_array = [];
+            for (let i = 0; i < data_array.length / 2; i++)
+                account_array.push({ login: data_array[i * 2], password: data_array[i * 2 + 1] });
+            if (index >= account_array.length)
+            {
+                console.log(`[${timestamp('HH:mm:ss')}][Account Database] Index ${index} not in account file (too few accounts)`);
+                return null;
+            }
+            return account_array[index];
         }
         catch (error) {
-            console.log("Error Reading 'apikey' file next to app.js, using Account generator.")
-            apikey = "";
-            return accgen(callback);
-        }
-        if (!apikey || apikey.split("\n")[0].length != 31) {
-            console.log("No api key in 'apikey' file found next to app.js, using Account generator.");
-            return accgen(callback);
-        }
-        else {
-            request('https://accgen.cathook.club/api/v1/account/' + apikey, function (e, r, b) {
-                try
-                {
-                    if (e || JSON.parse(b).error) {
-                        console.log("Error getting account (Check your api key)");
-                        return callback(e || JSON.parse(b).error);
-                    }
-                    try {
-                        callback(null, JSON.parse(b));
-                    } catch (e) {
-                        return callback(e);
-                    }
-                }
-                catch (e)
-                {
-                    console.log("Error getting Account");
-                    return {};
-                }
-            });
+            console.error(error);
+            console.error("Error Reading 'accounts.txt' in catbot-setup. Exiting.");
+            process.exit(1);
         }
     }
 }

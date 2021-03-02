@@ -2,7 +2,17 @@ const $ = require('jquery');
 const format = require('format-duration');
 const request = require('browser-request');
 
-const STATE = 'INITIALIZING INITIALIZED PREPARING STARTING WAITING RUNNING RESTARTING STOPPING ACCOUNT INJECTED'.split(' ');
+const STATE = [ 
+	'INITIALIZING',
+	'INITIALIZED',
+	'PREPARING',
+	'STARTING',
+	'WAITING',
+	'RUNNING',
+	'RESTARTING',
+	'STOPPING',
+	'NO ACCOUNT'
+];
 
 const classes = [
 	"Unknown", "Scout",
@@ -274,19 +284,8 @@ function refreshComplete() {
 	})
 }
 
-function queryConfig() {
-    request.get({
-        url: '/api/config/nodiscard'
-    }, function(e, r, b) {
-        console.log('c', b);
-        $('#check-no-discard').attr('checked', JSON.parse(b));
-        console.log($('#check-no-discard').attr('checked'));
-    });
-}
-
 $(function() {
 	updateData();
-    queryConfig();
     status.info('init done');
 	setInterval(updateData, 1000 * 2);
 	$('#console').on('keypress', function(e) {
@@ -320,12 +319,4 @@ $(function() {
 	$('#console-send').on('click', runCommand);
 	$("#bot-restartall").on('click', restartAllButtonCallback);
 	$("#bot-terminateall").on('click', terminateAllButtonCallback);
-    $('#check-no-discard').on('click', () => {
-        request.post({
-            uri: `api/config/nodiscard/${$('#check-no-discard').prop('checked')}`
-        }, (e, r, b) => {
-            console.log(b);
-            queryConfig();
-        });
-    });
 });
