@@ -2,7 +2,7 @@ const child_process = require('child_process');
 const EventEmitter = require('events');
 const extend = require('extend');
 
-const CONSOLE_PATH = '/opt/cathook/ipc/bin/console';
+const CONSOLE_PATH = '/opt/cathook/ipc/console';
 
 class CathookConsole extends EventEmitter {
     constructor() {
