@@ -10,7 +10,7 @@ const { Tail } = require("tail");
 const accounts = require('./acc.js');
 const config = require('./config');
 
-const LAUNCH_OPTIONS_STEAM = 'firejail --dns=1.1.1.1 %NETWORK% --noprofile --private="%HOME%" --name=%JAILNAME% --env=PULSE_SERVER="unix:/tmp/pulse.sock" --env=DISPLAY=%DISPLAY% --env=LD_PRELOAD=%LD_PRELOAD% %STEAM% -silent -noreactlogin  -login %LOGIN% %PASSWORD% -nominidumps -nobreakpad -no-browser -nofriendsui'
+const LAUNCH_OPTIONS_STEAM = 'firejail --dns=1.1.1.1 %NETWORK% --noprofile --private="%HOME%" --name=%JAILNAME% --env=PULSE_SERVER="unix:/tmp/pulse.sock" --env=DISPLAY=%DISPLAY% --env=LD_PRELOAD=%LD_PRELOAD% %STEAM% -silent -noreactlogin  -login %LOGIN% %PASSWORD% -nominidumps -nobreakpad -no-browser -nofriendsui -vgui'
 const LAUNCH_OPTIONS_STEAM_RESET = 'firejail --net=none --noprofile --private="%HOME%" %STEAM% --reset'
 const LAUNCH_OPTIONS_GAME = 'firejail --join=%JAILNAME% bash -c \'cd ~/$GAMEPATH && %REPLACE_RUNTIME% LD_PRELOAD=%LD_PRELOAD% DISPLAY=%DISPLAY% PULSE_SERVER="unix:/tmp/pulse.sock" ./hl2_linux -game tf -silent -sw -w 640 -h 480 -novid -nojoy -noshaderapi -nomouse -nomessagebox -nominidumps -nohltv -nobreakpad -particles 512 -snoforceformat -softparticlesdefaultoff -threads 1\''
 const LAUNCH_OPTIONS_GAME_NATIVE = LAUNCH_OPTIONS_GAME.replace("%REPLACE_RUNTIME%", 'LD_LIBRARY_PATH="$LD_LIBRARY_PATH:./bin"');
@@ -24,7 +24,7 @@ const TIMEOUT_IPC_STATE = 90000;
 // Time to wait for steam to be "ready"
 const TIMEOUT_STEAM_RUNNING = 90000;
 // Maximum amount of concurrently starting bots
-const MAX_CONURRENT_BOTS = 3;
+const MAX_CONURRENT_BOTS = 1;
 // Time to delay individual bot starts by to prevent IPC ID conflicts
 const DELAY_START_TIME = 1000;
 
