@@ -10,7 +10,7 @@ const { Tail } = require("tail");
 const accounts = require('./acc.js');
 const config = require('./config');
 
-const LAUNCH_OPTIONS_STEAM = 'firejail --dns=1.1.1.1 %NETWORK% --noprofile --private="%HOME%" --name=%JAILNAME% --env=PULSE_SERVER="unix:/tmp/pulse.sock" --env=DISPLAY=%DISPLAY% --env=LD_PRELOAD=%LD_PRELOAD% %STEAM% -silent -silent -nocache -noreactlogin-login %LOGIN% %PASSWORD% -nominidumps -nobreakpad -nofriendsui -noverifyfiles -vrdisable -nocrashmonitor -skipstreamingdrivers -vgui'
+const LAUNCH_OPTIONS_STEAM = 'firejail --dns=1.1.1.1 %NETWORK% --noprofile --private="%HOME%" --name=%JAILNAME% --env=PULSE_SERVER="unix:/tmp/pulse.sock" --env=DISPLAY=%DISPLAY% --env=LD_PRELOAD=%LD_PRELOAD% %STEAM% -silent -nocache -noreactlogin -login %LOGIN% %PASSWORD% -nominidumps -nobreakpad -nofriendsui -noverifyfiles -vrdisable -nocrashmonitor -skipstreamingdrivers -vgui'
 const LAUNCH_OPTIONS_STEAM_RESET = 'firejail --net=none --noprofile --private="%HOME%" %STEAM% --reset'
 const LAUNCH_OPTIONS_GAME = 'firejail --join=%JAILNAME% bash -c \'cd ~/$GAMEPATH && %REPLACE_RUNTIME% LD_PRELOAD=%LD_PRELOAD% DISPLAY=%DISPLAY% PULSE_SERVER="unix:/tmp/pulse.sock" ./hl2_linux -game tf -silent -sw -w 640 -h 200 -novid -nojoy -noshaderapi -nomouse -nocrashdialog -allowmultiple -nomessagebox -nominidumps -nohltv -nobreakpad -particles 512 -snoforceformat -softparticlesdefaultoff -threads 1 -noassert -nosteamcontroller -nojoy -noshaderapi -nomouse -nominidumps -nobreakpad -nosrgb -nostartupsound -noquicktime -no_texture_stream -nouserclip -mat_softwaretl -precachefontchars -limitvsconst +mat_aaquality 0 +mat_antialias 0\''
 const LAUNCH_OPTIONS_GAME_NATIVE = LAUNCH_OPTIONS_GAME.replace("%REPLACE_RUNTIME%", 'LD_LIBRARY_PATH="$LD_LIBRARY_PATH:./bin"');
