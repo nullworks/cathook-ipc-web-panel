@@ -240,12 +240,12 @@ class Bot extends EventEmitter {
 
         function registerDebianListener() {
             try {
-                tail_steam_err_logs.push(new Tail(path.join(this.home, ".steam/debian-installation/error.log")));
+                tail_steam_err_logs.push(new Tail(path.join(this.home, ".steam/debian-installation/logs/console_log.txt")));
                 tail_steam_err_logs[tail_steam_err_logs.length-1].on('line', (data) => {
                     processErrorLogs.bind(this)(data);
                 })
             } catch (error) {
-                self.log("No debian-installation/error.log file found.");
+                self.log("No debian-installation/logs/console_log.txt file found.");
                 tail_steam_err_logs.pop();
             }
         }
@@ -275,8 +275,7 @@ class Bot extends EventEmitter {
                 this.shouldRestart = true;
                 this.shouldResetSteam = true;
             }
-            if (isDebian && text.includes("Running Steam on"))
-                registerDebianListener.bind(this)();
+            if (isDebian) registerDebianListener.bind(this)();
         });
         self.procFirejailSteam.stderr.pipe(self.logSteam);
         self.procFirejailSteam.on('exit', self.handleSteamExit.bind(self));
